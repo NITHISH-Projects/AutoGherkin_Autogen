@@ -22,3 +22,14 @@ analysis:
 output:
   directory: outputs/feature_files
   format: feature  # Gherkin .feature files
+
+# Consent/CMP handling
+consent:
+  auto_dismiss: true
+  selectors:
+    onetrust_root: "#onetrust-consent-sdk"
+    reject_all: "#onetrust-reject-all-handler"
+    accept_all: "#onetrust-accept-btn-handler"
+    close: "#onetrust-close-btn-container"
+    site_banners:
+      - "button#indication-close"

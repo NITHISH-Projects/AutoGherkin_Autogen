@@ -72,11 +72,51 @@ class InteractionDetector:
             if not self._element_exists(selector):
                 return None
 
+            # Attempt to dismiss cookie/consent overlays (e.g., OneTrust) that intercept pointer events
+            if config.get("consent", {}).get("auto_dismiss", True):
+                self._dismiss_blocking_banners()
+
             # Capture overlay state before hover for delta calculation
             pre_overlay = self._detect_overlay_like()
 
-            # Move mouse to element center (more robust than dispatching events)
-            self.page.hover(selector, timeout=self.hover_delay)
+            # Prefer locator-based hover with scroll into view; then fallback strategies
+            loc = self.page.locator(selector).first
+            try:
+                loc.scroll_into_view_if_needed(timeout=self.hover_delay)
+            except Exception:
+                pass
+
+            hovered = False
+            try:
+                # Try locator.hover with a slightly larger timeout
+                loc.hover(timeout=self.hover_delay * 2)
+                hovered = True
+            except Exception:
+                # Fallback 1: move real mouse to the element center
+                try:
+                    box = loc.bounding_box()
+                    if box:
+                        cx = box["x"] + box["width"] / 2
+                        cy = box["y"] + box["height"] / 2
+                        self.page.mouse.move(cx, cy, steps=10)
+                        hovered = True
+                except Exception:
+                    pass
+
+            if not hovered:
+                # Fallback 2: dispatch a mouseover event or try page.hover with force
+                try:
+                    self.page.dispatch_event(selector, "mouseover")
+                    hovered = True
+                except Exception:
+                    try:
+                        # Some Playwright bindings support 'force' on page.hover
+                        self.page.hover(selector, timeout=self.hover_delay * 2, force=True)  # type: ignore
+                        hovered = True
+                    except Exception:
+                        # Last resort: hard-hide known blocking banners and continue
+                        self._force_hide_known_banners()
+
             self.page.wait_for_timeout(self.hover_delay)
 
             # Return the post state; delta computation happens at a higher level
@@ -85,6 +125,68 @@ class InteractionDetector:
         except Exception as e:
             print(f"Error simulating hover on {selector}: {e}")
         return None
+
+    def _dismiss_blocking_banners(self) -> None:
+        """
+        Dismiss common cookie/consent overlays that intercept pointer events.
+        Currently includes OneTrust and a generic site banner close button if present.
+        """
+        try:
+            # OneTrust consent (common IDs/selectors)
+            ot_root = self.page.locator("#onetrust-consent-sdk")
+            ot_visible = False
+            try:
+                ot_visible = ot_root.first.is_visible()
+            except Exception:
+                ot_visible = False
+
+            if ot_visible:
+                # Try reject first, then accept, then close
+                candidates = [
+                    "#onetrust-reject-all-handler",
+                    "#onetrust-accept-btn-handler",
+                    "#onetrust-close-btn-container",
+                    "button:has-text(\"Reject All\")",
+                    "button:has-text(\"Reject\")",
+                    "button:has-text(\"Accept All\")",
+                    "button:has-text(\"Accept\")",
+                ]
+                for sel in candidates:
+                    try:
+                        btn = self.page.locator(sel).first
+                        if btn.is_visible():
+                            btn.click(timeout=1500)
+                            break
+                    except Exception:
+                        continue
+                try:
+                    ot_root.first.wait_for(state="hidden", timeout=3000)
+                except Exception:
+                    # If still present, try to hide via CSS as a last resort
+                    self._force_hide_known_banners()
+
+            # Site-specific "indication" banner close if present (from error logs)
+            try:
+                indi = self.page.locator("button#indication-close").first
+                if indi.is_visible():
+                    indi.click(timeout=1000)
+            except Exception:
+                pass
+        except Exception:
+            # Best-effort; ignore failures
+            pass
+
+    def _force_hide_known_banners(self) -> None:
+        """Force-hide known blocking banners if graceful dismissal failed."""
+        try:
+            self.page.evaluate(
+                """() => {
+                    const el = document.querySelector('#onetrust-consent-sdk');
+                    if (el) { el.style.display = 'none'; el.setAttribute('aria-hidden', 'true'); }
+                }"""
+            )
+        except Exception:
+            pass
 
     # ------------------------------
     # Candidate Discovery & Utilities
