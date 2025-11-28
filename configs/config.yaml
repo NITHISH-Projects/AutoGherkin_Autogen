@@ -9,9 +9,9 @@ browser:
 
 # LLM Reasoning Settings
 llm:
-  model: mistral:latest  # Ollama model (installed)
+  model: llama3:instruct  # Instruction-tuned for better adherence
   base_url: http://localhost:11434  # Ollama server URL
-  temperature: 0.7
+  temperature: 0.0
 
 # Analysis Settings
 analysis:

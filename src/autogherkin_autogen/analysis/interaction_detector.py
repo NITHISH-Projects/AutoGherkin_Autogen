@@ -260,7 +260,10 @@ class InteractionDetector:
                 const tag = el.tagName;
                 const text = (el.textContent || '').trim().slice(0, 80);
                 const selector = cssPath(el);
-                result.push({ selector, tag, role, tabindex, text });
+                const href = el.tagName === 'A' ? (el.href || el.getAttribute('href') || '') : (el.getAttribute('href') || '');
+                const ariaLabel = el.getAttribute('aria-label') || '';
+                const titleAttr = el.getAttribute('title') || '';
+                result.push({ selector, tag, role, tabindex, text, href, ariaLabel, title: titleAttr });
             }
             return result;
         }
