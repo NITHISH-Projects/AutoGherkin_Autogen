@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Callable, Optional, Any, List, Dict
 from dataclasses import dataclass
 import logging
+from pathlib import Path
 
 from autogherkin_autogen.core.models import GenerationResult, Interaction
 from autogherkin_autogen.core.ports import (
@@ -80,7 +81,7 @@ class GeneratorService:
             detector = self.detector_factory(page_handle)
             interactions_raw = detector.detect_hover_interactions(potential)
 
-            # Generate Gherkin using LLM (if available) or fallback
+            # Generate Gherkin using LLM; if it fails, propagate the error (no hardcoded fallback)
             feature_path = self.gherkin_generator.generate_full_feature(url, interactions_raw)
 
             # Map to domain models for returns/analytics

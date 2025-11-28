@@ -9,9 +9,9 @@ browser:
 
 # LLM Reasoning Settings
 llm:
-  model: mistral:latest  # Ollama model (installed)
+  model: llama3:instruct  # Instruction-tuned for better adherence
   base_url: http://localhost:11434  # Ollama server URL
-  temperature: 0.7
+  temperature: 0.0
 
 # Analysis Settings
 analysis:
@@ -22,3 +22,14 @@ analysis:
 output:
   directory: outputs/feature_files
   format: feature  # Gherkin .feature files
+
+# Consent/CMP handling
+consent:
+  auto_dismiss: true
+  selectors:
+    onetrust_root: "#onetrust-consent-sdk"
+    reject_all: "#onetrust-reject-all-handler"
+    accept_all: "#onetrust-accept-btn-handler"
+    close: "#onetrust-close-btn-container"
+    site_banners:
+      - "button#indication-close"
