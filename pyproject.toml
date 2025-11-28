@@ -1,0 +1,13 @@
+# Author: MARRI NITHISH
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autogherkin-autogen"
+version = "0.1.0"
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["autogherkin_autogen*"]

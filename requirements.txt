@@ -1,0 +1,11 @@
+# Author: MARRI NITHISH
+playwright
+beautifulsoup4
+ollama
+pyautogen
+fastapi
+uvicorn
+streamlit
+requests
+pyyaml
+pytest

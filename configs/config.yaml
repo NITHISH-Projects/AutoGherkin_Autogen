@@ -1,0 +1,24 @@
+# Author: MARRI NITHISH
+# Configuration for AutoGherkin Generator
+
+# Browser Automation Settings
+browser:
+  type: chromium  # Options: chromium, firefox, webkit
+  headless: true
+  timeout: 30000  # ms
+
+# LLM Reasoning Settings
+llm:
+  model: mistral:latest  # Ollama model (installed)
+  base_url: http://localhost:11434  # Ollama server URL
+  temperature: 0.7
+
+# Analysis Settings
+analysis:
+  max_elements: 20  # Limit hoverable elements to check
+  hover_delay: 1000  # ms to wait after hover
+
+# Output Settings
+output:
+  directory: outputs/feature_files
+  format: feature  # Gherkin .feature files
