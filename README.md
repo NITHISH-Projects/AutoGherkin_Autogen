@@ -2,7 +2,7 @@
 # AutoGherkin Autogen
 
 AI-powered, dynamic Gherkin (.feature) generator for websites with hover-based interactions and overlays/popups.  
-The system runs Playwright to analyze a live page (no hardcoded selectors), detects hover-triggered reveals and modal overlays, and produces clean BDD scenarios. It integrates with AutoGen + Ollama where available, with a deterministic fallback to generate feature files even without an LLM.
+The system runs Playwright to analyze a live page (no hardcoded selectors), detects hover-triggered reveals and modal overlays, and produces clean BDD scenarios. It integrates with AutoGen + Ollama where available, with a deterministic fallback to generate feature files with LLM.
 
 Contents
 - Overview
